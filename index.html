@@ -25,7 +25,6 @@
       -moz-osx-font-smoothing:grayscale;
     }
 
-    /* Container */
     .hero{
       position:relative;
       min-height:100vh;
@@ -34,7 +33,6 @@
       overflow:hidden;
     }
 
-    /* Background blurred and zoomed (ken burns) */
     .bg{
       position:absolute;
       inset:0;
@@ -51,7 +49,6 @@
       to{transform:scale(1.06) translateY(-2%);}
     }
 
-    /* main card */
     .card{
       position:relative;
       z-index:2;
@@ -69,13 +66,11 @@
       align-items:center;
     }
 
-    /* responsive: stack on small screens */
     @media (max-width:880px){
       .card{grid-template-columns:1fr; padding:18px;}
       .controls{order:2;}
     }
 
-    /* left: big photo preview */
     .photo-wrap{
       position:relative;
       min-height:360px;
@@ -96,12 +91,10 @@
       transition: transform 14s linear;
     }
 
-    /* subtle slow zoom on the photo */
     .photo.zooming{
       transform: scale(1.06);
     }
 
-    /* right: controls and details */
     .controls{
       padding:18px;
       display:flex;
@@ -131,7 +124,6 @@
       line-height:1.45;
     }
 
-    /* player UI */
     .player{
       margin-top:8px;
       display:flex;
@@ -209,7 +201,6 @@
       color:rgba(255,255,255,0.8);
     }
 
-    /* footer overlay CTA */
     .overlay-top{
       position:absolute;
       z-index:3;
@@ -231,7 +222,6 @@
       transform:translateY(1px);
     }
 
-    /* subtle footer credit */
     .credit{
       text-align:center;
       margin-top:18px;
@@ -243,12 +233,12 @@
 <body>
 
   <main class="hero" id="hero">
-    <!-- background (replace image URL with your photo) -->
-    <div class="bg" id="bg" style="background-image: url('photo-large.jpg');"></div>
+    <!-- background (نام فایل عکس شما اینجاست) -->
+    <div class="bg" id="bg" style="background-image: url('IMG_20211116_204829_684.jpg');"></div>
 
     <div class="card" role="region" aria-label="صفحه نامزدی">
       <div class="photo-wrap" id="photoWrap">
-        <img src="photo-large.jpg" alt="عکس نامزدی" class="photo" id="photo">
+        <img src="IMG_20211116_204829_684.jpg" alt="عکس نامزدی" class="photo" id="photo">
       </div>
 
       <aside class="controls" aria-label="کنترل پخش">
@@ -317,12 +307,12 @@
 
     </div>
 
-    <!-- Audio element (replace audio file URL with your song) -->
-    <audio id="audio" preload="auto" src="song.mp3" crossorigin="anonymous"></audio>
+    <!-- Audio element -->
+    <!-- نام فایل آهنگ شما -->
+    <audio id="audio" preload="auto" src="Arown-Sadness-Disco.mp3" crossorigin="anonymous"></audio>
   </main>
 
   <script>
-    // Elements
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
@@ -338,10 +328,8 @@
     const photoWrap = document.getElementById('photoWrap');
     const downloadPhoto = document.getElementById('downloadPhoto');
 
-    // 初期 تنظیمات
     audio.volume = parseFloat(volumeSlider.value);
 
-    // helper time format
     function fmtTime(t){
       if (!isFinite(t)) return '00:00';
       const m = Math.floor(t/60).toString().padStart(2,'0');
@@ -349,26 +337,22 @@
       return m+':'+s;
     }
 
-    // Update duration when metadata loaded
     audio.addEventListener('loadedmetadata', ()=>{
       durationEl.textContent = fmtTime(audio.duration);
     });
 
-    // Update progress as audio plays
     audio.addEventListener('timeupdate', ()=>{
       const pct = (audio.currentTime / audio.duration) * 100 || 0;
       progressBar.style.width = pct + '%';
       currentTimeEl.textContent = fmtTime(audio.currentTime);
     });
 
-    // Play / Pause
     async function togglePlay(){
       if (audio.paused){
         try{
           await audio.play();
           onPlay();
         }catch(e){
-          // autoplay blocked: change UI to indicate user action required
           playLabel.textContent = 'پخش (لمس کنید)';
         }
       }else{
@@ -391,20 +375,17 @@
 
     playBtn.addEventListener('click', togglePlay);
 
-    // Mute toggle
     muteBtn.addEventListener('click', ()=>{
       audio.muted = !audio.muted;
       muteBtn.style.opacity = audio.muted ? 0.6 : 1;
     });
 
-    // Volume slider
     volumeSlider.addEventListener('input', (e)=>{
       audio.volume = parseFloat(e.target.value);
       if (audio.volume === 0) audio.muted = true;
       else audio.muted = false;
     });
 
-    // Seek by clicking progress bar
     progress.addEventListener('click', (e)=>{
       const rect = progress.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -412,37 +393,30 @@
       audio.currentTime = pct * audio.duration;
     });
 
-    // Click photo to toggle play/pause
     photoWrap.addEventListener('click', togglePlay);
 
-    // When audio ends
     audio.addEventListener('ended', ()=>{
       audio.currentTime = 0;
       audio.pause();
       onPause();
     });
 
-    // Download photo (opens in new tab)
     downloadPhoto.addEventListener('click', ()=>{
       const src = photo.getAttribute('src');
-      // open image in new tab for download
       window.open(src, '_blank');
     });
 
-    // Try to autoplay on first user interaction if autoplay blocked:
-    // If user interacts anywhere on the page, attempt to play.
     let triedAutoplay = false;
     function tryAutoplay(){
       if (triedAutoplay) return;
       triedAutoplay = true;
-      audio.play().then(()=>onPlay()).catch(()=>{/* still blocked */});
+      audio.play().then(()=>onPlay()).catch(()=>{});
       window.removeEventListener('pointerdown', tryAutoplay);
       window.removeEventListener('keydown', tryAutoplay);
     }
     window.addEventListener('pointerdown', tryAutoplay);
     window.addEventListener('keydown', tryAutoplay);
 
-    // Accessibility: space toggles play/pause
     window.addEventListener('keydown', (e)=>{
       if (e.code === 'Space' && document.activeElement === document.body){
         e.preventDefault();
@@ -450,17 +424,11 @@
       }
     });
 
-    // Replace background image dynamically from photo src (so both stay in sync)
     function syncBackground(){
       const src = photo.getAttribute('src');
       bg.style.backgroundImage = `url('${src}')`;
     }
-    // On load
     syncBackground();
-
-    // If you want to lazy-load a hi-res image: swap src when visible (simple)
-    // Not implemented automatically here; just keep image URLs in src attributes.
-
   </script>
 
 </body>
